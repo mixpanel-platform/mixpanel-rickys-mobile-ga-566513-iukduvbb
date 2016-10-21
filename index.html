@@ -34,55 +34,54 @@
   
 <script class="jql">
     var number_of_days = 30;
-    var library = 'iphone';
-    var default_props = {"$city":1,"$region":1,"mp_country_code":1,"$brand":1,"$bluetooth_version":1,"$device":1,"$os":1,"$app_release":1,"$app_version":1,"$carrier":1,"$lib_version":1,"$wifi":1,"$screen_width":1,"$screen_height":1,"$model":1,"$os_version":1,"$manufacturer":1,"$screen_dpi":1,"$has_telephone":1,"has_nfc":1,"$bluetooth_enabled":1,"$browser":1,"$initial_referrer":1,"$initial_referring_domain":1,"$referrer":1,"$referring_domain":1,"$browser_version":1,"mp_keyword":1,"$search_engine":1,"utm_source":1,"utm_medium":1,"utm_campaign":1,"utm_content":1,"utm_term":1,"$radio":1,"mp_device_model":1,"$google_play_services":1,"mp_lib":1,"campaign_id":1,"message_id":1,"message_subtype":1,"message_type":1,"$answer_count":1,"survey_id":1,"collection_id":1,"$survey_shown":1,"$watch_model":1,"$ios_ifa":1,"$current_url":1,"$duration":1,"$from_binding":1,"$experiments":1,"$import":1,"distinct_id":1,"time":1,"$has_nfc":1};
-    
-    
-    var default_events = {"$campaign_delivery":1,"$campaign_marked_spam":1,"$campaign_bounced":1,"$campaign_open":1,"$experiment_started":1,"$show_survey":1, "$campaign_received":1};
-    
-    var from_date = new Date(_.now() - (number_of_days * 24 * 60 * 60 * 1000)).toISOString().slice(0, -14);
-    function main() {
-      return Events({
-        from_date: from_date,
-        to_date: new Date().toISOString().slice(0, -14)  
-      })
-      // .filter(event => event.properties.mp_lib == library)
-      .filter(event => !default_events[event.name])
-      .groupBy(['name'], function(accums, events){
-        var res = {};
-        _.each(events, function(event) {
-          res[event.name] = res[event.name] || {};
-          _.each(event.properties, function(propVal, propName) {
-            if (!default_props[propName]) {
-              res[event.name][propName] = res[event.name][propName] || [];
-              res[event.name][propName] = _.union(res[event.name][propName], [typeof(propVal)]);
-            }
-          });
+  var library = 'iphone';
+  var default_props = {"$city":1,"$region":1,"mp_country_code":1,"$brand":1,"$bluetooth_version":1,"$device":1,"$os":1,"$app_release":1,"$app_version":1,"$carrier":1,"$lib_version":1,"$wifi":1,"$screen_width":1,"$screen_height":1,"$model":1,"$os_version":1,"$manufacturer":1,"$screen_dpi":1,"$has_telephone":1,"has_nfc":1,"$bluetooth_enabled":1,"$browser":1,"$initial_referrer":1,"$initial_referring_domain":1,"$referrer":1,"$referring_domain":1,"$browser_version":1,"mp_keyword":1,"$search_engine":1,"utm_source":1,"utm_medium":1,"utm_campaign":1,"utm_content":1,"utm_term":1,"$radio":1,"mp_device_model":1,"$google_play_services":1,"mp_lib":1,"campaign_id":1,"message_id":1,"message_subtype":1,"message_type":1,"$answer_count":1,"survey_id":1,"collection_id":1,"$survey_shown":1,"$watch_model":1,"$ios_ifa":1,"$current_url":1,"$duration":1,"$from_binding":1,"$experiments":1,"$import":1,"distinct_id":1,"time":1,"$has_nfc":1};
+  
+  
+  var default_events = {"$campaign_delivery":1,"$campaign_marked_spam":1,"$campaign_bounced":1,"$campaign_open":1,"$experiment_started":1,"$show_survey":1, "$campaign_received":1};
+  
+  var from_date = new Date(_.now() - (number_of_days * 24 * 60 * 60 * 1000)).toISOString().slice(0, -14);
+  function main() {
+    return Events({
+      from_date: from_date,
+      to_date: new Date().toISOString().slice(0, -14)  
+    })
+    // .filter(event => event.properties.mp_lib == library)
+    .filter(event => !default_events[event.name])
+    .groupBy(['name'], function(accums, events){
+      var res = {};
+      _.each(events, function(event) {
+        res[event.name] = res[event.name] || {};
+        _.each(event.properties, function(propVal, propName) {
+          if (!default_props[propName]) {
+            res[event.name][propName] = res[event.name][propName] || [];
+            res[event.name][propName] = _.union(res[event.name][propName], [typeof(propVal)]);
+          }
         });
-        _.each(accums, function(accum) {
-          _.each(accum, function(propList, eventName) {
-            res[eventName] = res[eventName] || {};
-            _.each(propList, function(propTypes, propName) {
-              res[eventName][propName] = res[eventName][propName] || {};
-              res[eventName][propName] = _.union(res[eventName][propName], propTypes);
-            });
-          });
-        });
-        return res;
-      })
-      .map(item => item.value)
-      .map(item => {
-        var res ={name: 'Spec', children: []}
-        _.each(item, (props, event) => {
-          var tmp = {name: event, children: []}
-          _.each(props, (types, prop) => {
-            tmp.children.push({name: prop, children: _.map(types, type => ({name: type}))})
-          })
-          res.children.push(tmp)
-        })
-        return res
       });
-    }
+      _.each(accums, function(accum) {
+        _.each(accum, function(propList, eventName) {
+          res[eventName] = res[eventName] || {};
+          _.each(propList, function(propTypes, propName) {
+            res[eventName][propName] = res[eventName][propName] || {};
+            res[eventName][propName] = _.union(res[eventName][propName], propTypes);
+          });
+        });
+      });
+      return res;
+    })
+    .map(item => item.value)
+    .map(item => {
+      var res
+      _.each(item, (props, event) => {
+        res = {name: event, children: []}
+        _.each(props, (types, prop) => {
+          res.children.push({name: prop, children: _.map(types, type => ({name: type}))})
+        })
+      })
+      return res
+    });
+  }
 
 </script>  
 <script>
@@ -108,7 +107,7 @@
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   
   MP.api.jql($('.jql').html()).done(function(data){
-    update(data);
+    update({name: 'Spec', children: data});
   })
   
   function update(source) {
