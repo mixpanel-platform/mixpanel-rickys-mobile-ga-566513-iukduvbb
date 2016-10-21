@@ -70,8 +70,20 @@
         });
         return res;
       })
-      .map(item => item.value);
+      .map(item => item.value)
+      .map(item => {
+        var res ={name: 'Spec', children: []}
+        _.each(item, (props, event) => {
+          var tmp = {name: event, children: []}
+          _.each(props, (types, prop) => {
+            tmp.children.push({name: prop, children: _.map(types, type => ({name: type}))})
+          })
+          res.children.push(tmp)
+        })
+        return res
+      });
     }
+
 </script>  
 <script>
   
