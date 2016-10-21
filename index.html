@@ -107,7 +107,7 @@
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
   
   MP.api.jql($('.jql').html()).done(function(data){
-    update({name: 'Spec', children: data});
+    update(root = {name: 'Spec', children: data});
   })
   
   function update(source) {
